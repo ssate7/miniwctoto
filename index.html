@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>사무실 미니 토토 (배당률 재조회형)</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; text-align: center; background-color: #f4f6f9; padding: 10px; margin: 0; }
+        .container { max-width: 100%; margin: 10px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
+        h1 { color: #1a365d; font-size: 22px; margin-top: 5px; margin-bottom: 5px; }
+        .match-up { font-size: 18px; font-weight: bold; margin: 10px 0; color: #2d3748; }
+        
+        /* 룰 안내 */
+        .rule-box { background-color: #fffaf0; border: 1px solid #fbd38d; color: #744210; padding: 12px; border-radius: 8px; margin: 12px 0 15px 0; text-align: left; font-size: 14px; line-height: 1.55; }
+        .rule-box strong { display: block; margin-bottom: 5px; color: #975a16; }
+        .rule-box ol { margin: 5px 0 0 20px; padding: 0; }
+        .rule-box li { margin: 2px 0; }
+        
+        /* 상금 표시 구역 */
+        .pool-info { background-color: #ebf8ff; color: #2b6cb0; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 15px; }
+        .settlement-summary { display: none; background-color: #f0fff4; color: #22543d; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; margin: 12px 0 15px 0; line-height: 1.5; }
+        .recheck-guide { color: #718096; font-size: 13px; margin-top: -4px; margin-bottom: 8px; line-height: 1.45; }
+        .sub-button { background-color: #718096; }
+        .sub-button:hover { background-color: #4a5568; }
+        
+        .input-group { margin: 12px 0; display: flex; justify-content: center; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .input-label { font-size: 14px; font-weight: bold; color: #4a5568; }
+        
+        input[type="text"], input[type="number"] { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; width: 65px; text-align: center; font-size: 16px; -webkit-appearance: none; box-sizing: border-box; }
+        input[type="text"] { width: 90px; }
+        #entryFee { width: 90px; }
+        
+        button { padding: 10px 14px; background-color: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        button:hover { background-color: #2b6cb0; }
+        
+        .table-wrap { width: 100%; overflow-x: auto; }
+        table { width: 100%; margin-top: 15px; border-collapse: collapse; font-size: 14px; min-width: 540px; }
+        th, td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; text-align: center; white-space: nowrap; }
+        th { background-color: #edf2f7; color: #4a5568; }
+        
+        .result-section { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #cbd5e0; }
+        .result-section h3 { margin: 0 0 10px 0; font-size: 16px; color: #c53030; }
+        
+        /* 정산 결과 표시 스타일 */
+        .exact-winner { background-color: #c6f6d5; font-weight: bold; color: #22543d; }
+        .outcome-winner { background-color: #feebc8; font-weight: bold; color: #744210; }
+        .loser { color: #718096; }
+        .odds-text { font-weight: bold; }
+        .money-text { font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏆 사무실 미니 토토 🏆</h1>
+    <div class="match-up">🇰🇷 대한민국 vs 🇲🇽 멕시코</div>
+
+    <div class="rule-box">
+        <strong>📌 미니 토토 룰</strong>
+        <ol>
+            <li>참가자는 경기 전 예상 스코어를 1개씩 등록합니다.</li>
+            <li>실제 결과 입력 후, 정확한 스코어 적중자가 있으면 총 상금을 1/N로 나눕니다.</li>
+            <li>스코어 적중자가 없으면 승·무·패 적중자가 총 상금을 1/N로 나눕니다.</li>
+            <li>배당률은 <b>개인 지급액 ÷ 인당 참가비</b>로 표시합니다.</li>
+            <li>정산 후에도 참가자 예측은 유지되며, 실제 경기결과만 바꿔 재조회할 수 있습니다.</li>
+        </ol>
+    </div>
+    
+    <div class="input-group">
+        <span class="input-label">인당 참가비:</span>
+        <input type="number" id="entryFee" value="5000" min="0" step="1000" onchange="handleEntryFeeChange()"> <span class="input-label">원</span>
+    </div>
+    <div class="pool-info" id="totalPoolText">
+        현재 총 상금: 0원 (참가 0명)
+    </div>
+    <div class="settlement-summary" id="settlementSummary"></div>
+    
+    <div class="input-group">
+        <input type="text" id="userName" placeholder="이름" autocomplete="off">
+        <input type="number" id="korScore" placeholder="한국" min="0">
+        <span style="font-weight:bold;">:</span>
+        <input type="number" id="mexScore" placeholder="멕시코" min="0">
+        <button onclick="addPrediction()">등록</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>예측 스코어</th>
+                    <th>예측 결과</th>
+                    <th>배당률</th>
+                    <th>지급액</th>
+                </tr>
+            </thead>
+            <tbody id="predictList"></tbody>
+        </table>
+    </div>
+
+    <div class="result-section">
+        <h3>📢 실제 경기 결과 입력 & 정산</h3>
+        <div class="input-group">
+            <span class="input-label">한국</span> <input type="number" id="finalKor" min="0">
+            <span class="input-label">멕시코</span> <input type="number" id="finalMex" min="0">
+            <button onclick="calculateWinner(true)" style="background-color: #e53e3e;">결과 조회/재조회</button>
+            <button onclick="saveFinalResult()" style="background-color: #38a169;">경기결과 저장</button>
+            <button onclick="resetFinalResultOnly()" class="sub-button">경기결과만 초기화</button>
+            <button onclick="closeBetting()" class="sub-button">신청 마감</button>
+            <button onclick="openBetting()" class="sub-button">신청 재개</button>
+        </div>
+        <div class="recheck-guide">※ 참가자 목록은 그대로 유지됩니다. 한국·멕시코 실제 점수만 바꾸면 정산 결과와 배당률이 다시 계산됩니다.</div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+    import {
+        getFirestore,
+        collection,
+        doc,
+        setDoc,
+        getDoc,
+        onSnapshot,
+        query,
+        orderBy,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjwDSbkO4oxWswlSRwU6c90KyJ7MlkMYY",
+        authDomain: "miniwctoto.firebaseapp.com",
+        projectId: "miniwctoto",
+        storageBucket: "miniwctoto.firebasestorage.app",
+        messagingSenderId: "804729451401",
+        appId: "1:804729451401:web:c982aec660f74d81cb6758",
+        measurementId: "G-EL2PWVRLWW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    const matchId = "korea-mexico-2026";
+    const predictionsRef = collection(db, "matches", matchId, "predictions");
+    const settingsRef = doc(db, "matches", matchId, "settings", "main");
+
+    let predictions = [];
+    let lastSettlement = null;
+    let settings = {
+        entryFee: 5000,
+        finalKor: null,
+        finalMex: null,
+        resultEntered: false,
+        closed: false
+    };
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function getOutcomeText(kor, mex) {
+        if (kor > mex) return "한국 승";
+        if (kor < mex) return "멕시코 승";
+        return "무승부";
+    }
+
+    function getEntryFee() {
+        return Number(settings.entryFee ?? document.getElementById('entryFee').value) || 0;
+    }
+
+    function getTotalPool() {
+        return predictions.length * getEntryFee();
+    }
+
+    function updatePoolDisplay() {
+        const totalPool = getTotalPool();
+        document.getElementById('totalPoolText').innerText = `현재 총 상금: ${totalPool.toLocaleString()}원 (참가 ${predictions.length}명)`;
+    }
+
+    function isValidScore(scoreText) {
+        if (scoreText === "" || scoreText === null || scoreText === undefined) return false;
+        const score = Number(scoreText);
+        return Number.isInteger(score) && score >= 0;
+    }
+
+    function clearSettlement() {
+        lastSettlement = null;
+        const summary = document.getElementById('settlementSummary');
+        summary.style.display = 'none';
+        summary.innerText = '';
+    }
+
+    function hasValidFinalResult() {
+        return isValidScore(document.getElementById('finalKor').value) && isValidScore(document.getElementById('finalMex').value);
+    }
+
+    async function loadOrCreateSettings() {
+        const snap = await getDoc(settingsRef);
+        if (!snap.exists()) {
+            await setDoc(settingsRef, {
+                entryFee: 5000,
+                finalKor: null,
+                finalMex: null,
+                resultEntered: false,
+                closed: false,
+                createdAt: serverTimestamp()
+            });
+        }
+    }
+
+    function listenSettings() {
+        onSnapshot(settingsRef, (snap) => {
+            if (!snap.exists()) return;
+            settings = { ...settings, ...snap.data() };
+            document.getElementById('entryFee').value = settings.entryFee ?? 5000;
+            if (settings.finalKor !== null && settings.finalKor !== undefined) document.getElementById('finalKor').value = settings.finalKor;
+            if (settings.finalMex !== null && settings.finalMex !== undefined) document.getElementById('finalMex').value = settings.finalMex;
+            updatePoolDisplay();
+            if (settings.resultEntered && hasValidFinalResult() && predictions.length > 0) calculateWinner(false);
+            else { clearSettlement(); updateTable(); }
+        }, (error) => alert("설정값을 불러오지 못했습니다: " + error.message));
+    }
+
+    function listenPredictions() {
+        const q = query(predictionsRef, orderBy("createdAt", "asc"));
+        onSnapshot(q, (snapshot) => {
+            predictions = [];
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                predictions.push({ id: docSnap.id, name: data.name, kor: data.kor, mex: data.mex, outcome: data.outcome, createdAt: data.createdAt });
+            });
+            updatePoolDisplay();
+            if (settings.resultEntered && hasValidFinalResult() && predictions.length > 0) calculateWinner(false);
+            else updateTable();
+        }, (error) => alert("참가자 목록을 불러오지 못했습니다: " + error.message));
+    }
+
+    window.handleEntryFeeChange = async function () {
+        const entryFee = parseInt(document.getElementById('entryFee').value, 10) || 0;
+        await setDoc(settingsRef, { entryFee, updatedAt: serverTimestamp() }, { merge: true });
+        settings.entryFee = entryFee;
+        updatePoolDisplay();
+        if (lastSettlement) calculateWinner(false);
+    };
+
+    window.addPrediction = async function () {
+        const name = document.getElementById('userName').value.trim();
+        const korStr = document.getElementById('korScore').value;
+        const mexStr = document.getElementById('mexScore').value;
+        if (!name || !isValidScore(korStr) || !isValidScore(mexStr)) {
+            alert("이름과 0 이상의 정수 스코어를 모두 입력해주세요!");
+            return;
+        }
+        if (settings.closed) {
+            alert("신청이 마감되었습니다.");
+            return;
+        }
+        const kor = parseInt(korStr, 10);
+        const mex = parseInt(mexStr, 10);
+        const outcome = getOutcomeText(kor, mex);
+        const safeDocId = name.replace(/[\/.#$\[\]]/g, "_");
+        try {
+            const existing = await getDoc(doc(predictionsRef, safeDocId));
+            if (existing.exists()) {
+                alert("이미 등록된 이름입니다. 수정이 필요하면 관리자에게 문의하세요.");
+                return;
+            }
+            await setDoc(doc(predictionsRef, safeDocId), { name, kor, mex, outcome, createdAt: serverTimestamp() });
+            document.getElementById('userName').value = "";
+            document.getElementById('korScore').value = "";
+            document.getElementById('mexScore').value = "";
+            document.getElementById('userName').focus();
+        } catch (error) {
+            alert("등록 중 오류가 발생했습니다: " + error.message);
+        }
+    };
+
+    window.resetFinalResultOnly = async function () {
+        document.getElementById('finalKor').value = "";
+        document.getElementById('finalMex').value = "";
+        await setDoc(settingsRef, { finalKor: null, finalMex: null, resultEntered: false, updatedAt: serverTimestamp() }, { merge: true });
+        clearSettlement();
+        updateTable();
+    };
+
+    window.saveFinalResult = async function () {
+        const finalKorStr = document.getElementById('finalKor').value;
+        const finalMexStr = document.getElementById('finalMex').value;
+        if (!isValidScore(finalKorStr) || !isValidScore(finalMexStr)) {
+            alert("실제 경기 결과를 0 이상의 정수로 입력해주세요!");
+            return;
+        }
+        await setDoc(settingsRef, { finalKor: parseInt(finalKorStr, 10), finalMex: parseInt(finalMexStr, 10), resultEntered: true, updatedAt: serverTimestamp() }, { merge: true });
+        calculateWinner(true);
+    };
+
+    window.closeBetting = async function () {
+        await setDoc(settingsRef, { closed: true, updatedAt: serverTimestamp() }, { merge: true });
+        alert("신청을 마감했습니다.");
+    };
+
+    window.openBetting = async function () {
+        await setDoc(settingsRef, { closed: false, updatedAt: serverTimestamp() }, { merge: true });
+        alert("신청을 다시 열었습니다.");
+    };
+
+    function updateTable() {
+        const tbody = document.getElementById('predictList');
+        tbody.innerHTML = "";
+        if (predictions.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">아직 등록된 참가자가 없습니다.</td></tr>`;
+            return;
+        }
+        predictions.forEach(p => {
+            tbody.innerHTML += `<tr><td>${escapeHtml(p.name)}</td><td>${p.kor} : ${p.mex}</td><td>${p.outcome}</td><td>-</td><td>-</td></tr>`;
+        });
+    }
+
+    window.calculateWinner = function (showAlert = true) {
+        const finalKorStr = document.getElementById('finalKor').value;
+        const finalMexStr = document.getElementById('finalMex').value;
+        if (!isValidScore(finalKorStr) || !isValidScore(finalMexStr)) {
+            if (showAlert) alert("실제 경기 결과를 0 이상의 정수로 입력해주세요!");
+            return;
+        }
+        if (predictions.length === 0) {
+            if (showAlert) alert("참가자가 없습니다!");
+            return;
+        }
+        const finalKor = parseInt(finalKorStr, 10);
+        const finalMex = parseInt(finalMexStr, 10);
+        const finalOutcome = getOutcomeText(finalKor, finalMex);
+        const entryFee = getEntryFee();
+        const totalPool = getTotalPool();
+        const exactWinners = predictions.filter(p => p.kor === finalKor && p.mex === finalMex);
+        const outcomeWinners = predictions.filter(p => p.outcome === finalOutcome);
+        let settlementType = "당첨자 없음";
+        let winners = [];
+        let prize = 0;
+        let message = "";
+        if (exactWinners.length > 0) {
+            settlementType = "스코어 적중";
+            winners = exactWinners;
+            prize = Math.floor(totalPool / exactWinners.length);
+            message = `🎉 [스코어 완벽 적중]
+
+당첨자: ${winners.map(w => w.name).join(', ')}
+인당 지급액: ${prize.toLocaleString()}원
+배당률: ${formatOdds(prize, entryFee)}`;
+        } else if (outcomeWinners.length > 0) {
+            settlementType = "승무패 적중";
+            winners = outcomeWinners;
+            prize = Math.floor(totalPool / outcomeWinners.length);
+            message = `📢 [스코어 적중자 없음 → 승무패 정산]
+
+실제 결과: ${finalOutcome}
+당첨자: ${winners.map(w => w.name).join(', ')}
+인당 지급액: ${prize.toLocaleString()}원
+배당률: ${formatOdds(prize, entryFee)}`;
+        } else {
+            message = `😢 [당첨자 없음]
+
+승무패마저 맞춘 사람이 없습니다. 판돈은 다음 경기로 이월하거나 회식비로 처리하세요.`;
+        }
+        lastSettlement = { finalKor, finalMex, finalOutcome, settlementType, winners, prize, entryFee, totalPool };
+        renderSettlementTable();
+        renderSettlementSummary();
+        if (showAlert) alert(message);
+    };
+
+    function formatOdds(prize, entryFee) {
+        if (entryFee <= 0) return "-";
+        return `${(prize / entryFee).toFixed(2)}배`;
+    }
+
+    function isWinner(p, settlement) {
+        return settlement.winners.some(w => w.id === p.id);
+    }
+
+    function renderSettlementTable() {
+        const tbody = document.getElementById('predictList');
+        const settlement = lastSettlement;
+        tbody.innerHTML = "";
+        predictions.forEach(p => {
+            const winner = isWinner(p, settlement);
+            const rowClass = winner ? (settlement.settlementType === "스코어 적중" ? 'exact-winner' : 'outcome-winner') : 'loser';
+            const tag = winner ? (settlement.settlementType === "스코어 적중" ? '👑 스코어적중' : '💰 승무패적중') : '낙첨';
+            const payout = winner ? settlement.prize : 0;
+            const odds = winner ? formatOdds(settlement.prize, settlement.entryFee) : '0.00배';
+            tbody.innerHTML += `<tr class="${rowClass}"><td>${escapeHtml(p.name)}</td><td>${p.kor} : ${p.mex}</td><td>${p.outcome} / ${tag}</td><td class="odds-text">${odds}</td><td class="money-text">${payout.toLocaleString()}원</td></tr>`;
+        });
+    }
+
+    function renderSettlementSummary() {
+        const settlement = lastSettlement;
+        const summary = document.getElementById('settlementSummary');
+        const winnerNames = settlement.winners.map(w => escapeHtml(w.name)).join(', ');
+        if (settlement.winners.length === 0) {
+            summary.innerHTML = `실제 결과: 대한민국 ${settlement.finalKor} : ${settlement.finalMex} 멕시코<br>정산 결과: 당첨자 없음 / 총 상금 ${settlement.totalPool.toLocaleString()}원`;
+        } else {
+            summary.innerHTML = `실제 결과: 대한민국 ${settlement.finalKor} : ${settlement.finalMex} 멕시코<br>${settlement.settlementType} 당첨자: ${winnerNames}<br>인당 지급액 ${settlement.prize.toLocaleString()}원 / 배당률 ${formatOdds(settlement.prize, settlement.entryFee)}`;
+        }
+        summary.style.display = 'block';
+    }
+
+    document.getElementById('finalKor').addEventListener('input', () => {
+        if (hasValidFinalResult() && predictions.length > 0) calculateWinner(false);
+    });
+    document.getElementById('finalMex').addEventListener('input', () => {
+        if (hasValidFinalResult() && predictions.length > 0) calculateWinner(false);
+    });
+
+    await loadOrCreateSettings();
+    listenSettings();
+    listenPredictions();
+</script>
+
+</body>
+</html>
