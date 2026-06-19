@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>취득세과 미니 토토 - 대한민국 vs 남아공</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; text-align: center; background-color: #f4f6f9; padding: 10px; margin: 0; }
+        .container { max-width: 100%; margin: 10px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
+        h1 { color: #1a365d; font-size: 22px; margin-top: 5px; margin-bottom: 5px; }
+        .match-up { font-size: 18px; font-weight: bold; margin: 10px 0; color: #2d3748; }
+        .top-flag { width: 30px; height: auto; vertical-align: middle; margin: 0 6px; border: 1px solid #e2e8f0; box-sizing: border-box; }
+        .match-up .team-name { display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+        
+        /* 룰 안내 */
+        .rule-box { background-color: #fffaf0; border: 1px solid #fbd38d; color: #744210; padding: 12px; border-radius: 8px; margin: 12px 0 15px 0; text-align: left; font-size: 14px; line-height: 1.55; }
+        .rule-box strong { display: block; margin-bottom: 5px; color: #975a16; }
+        .rule-box ol { margin: 5px 0 0 20px; padding: 0; }
+        .rule-box li { margin: 2px 0; }
+        
+        /* 상금 표시 구역 */
+        .pool-info { background-color: #ebf8ff; color: #2b6cb0; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 15px; }
+        .settlement-summary { display: none; background-color: #f0fff4; color: #22543d; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; margin: 12px 0 15px 0; line-height: 1.5; }
+        .recheck-guide { color: #718096; font-size: 13px; margin-top: -4px; margin-bottom: 8px; line-height: 1.45; }
+        .sub-button { background-color: #718096; }
+        .sub-button:hover { background-color: #4a5568; }
+        
+        .input-group { margin: 12px 0; display: flex; justify-content: center; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .input-label { font-size: 14px; font-weight: bold; color: #4a5568; }
+        
+        input[type="text"], input[type="number"] { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; width: 65px; text-align: center; font-size: 16px; -webkit-appearance: none; box-sizing: border-box; }
+        input[type="text"] { width: 90px; }
+        #entryFee { width: 90px; }
+        
+        button { padding: 10px 14px; background-color: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        button:hover { background-color: #2b6cb0; }
+        
+        .table-wrap { width: 100%; overflow-x: auto; }
+        table { width: 100%; margin-top: 15px; border-collapse: collapse; font-size: 14px; min-width: 540px; }
+        th, td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; text-align: center; white-space: nowrap; }
+        th { background-color: #edf2f7; color: #4a5568; }
+        
+        .result-section { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #cbd5e0; }
+        .result-section h3 { margin: 0 0 10px 0; font-size: 16px; color: #c53030; }
+        
+        /* 정산 결과 표시 스타일 */
+        .exact-winner { background-color: #c6f6d5; font-weight: bold; color: #22543d; }
+        .outcome-winner { background-color: #feebc8; font-weight: bold; color: #744210; }
+        .loser { color: #718096; }
+        .odds-text { font-weight: bold; }
+        .money-text { font-weight: bold; }
+    
+        .status-box { background-color:#edf2f7; color:#2d3748; padding:10px; border-radius:8px; font-weight:bold; font-size:14px; margin:10px 0; }
+        .closed { background-color:#fff5f5; color:#c53030; }
+
+        .match-time-box { background-color:#f7fafc; border:1px solid #cbd5e0; color:#2d3748; padding:12px; border-radius:8px; margin:10px 0 12px 0; font-size:14px; line-height:1.55; font-weight:bold; }
+        .deadline-text { color:#c53030; }
+        .preview-box { margin-top:22px; padding:14px; border-radius:10px; background-color:#f7fafc; border:1px solid #e2e8f0; text-align:left; color:#2d3748; font-size:14px; line-height:1.6; }
+        .preview-box h3 { margin:0 0 8px 0; color:#1a365d; font-size:17px; text-align:center; }
+        .preview-box ul { margin:8px 0 12px 20px; padding:0; }
+        .preview-link { display:block; text-align:center; margin-top:10px; padding:11px 14px; background-color:#03c75a; color:white; border-radius:8px; text-decoration:none; font-weight:bold; }
+        .preview-link:hover { filter:brightness(0.95); }
+        .preview-note { color:#718096; font-size:12.5px; text-align:center; margin-top:8px; }
+        .fixed-info { margin-top:14px; border-top:1px solid #e2e8f0; padding-top:14px; }
+        .fixed-info-title { text-align:center; font-weight:bold; color:#1a365d; margin:0 0 10px 0; font-size:16px; }
+        .compare-grid { display:grid; grid-template-columns:1fr auto 1fr; gap:6px; align-items:center; margin-bottom:12px; }
+        .team-card { background:white; border:1px solid #e2e8f0; border-radius:8px; padding:10px 6px; text-align:center; font-weight:bold; }
+        .team-card .flag { font-size:22px; display:block; margin-bottom:3px; }
+        .vs-text { color:#a0aec0; font-weight:bold; font-size:14px; }
+        .info-table { width:100%; min-width:0; margin-top:8px; border-collapse:collapse; font-size:13px; }
+        .info-table th, .info-table td { padding:8px 4px; border-bottom:1px solid #e2e8f0; text-align:center; white-space:normal; }
+        .info-table th { background:#edf2f7; color:#4a5568; }
+        .info-table td:first-child { font-weight:bold; color:#2d3748; }
+        .advancement-row strong { color:#1a365d; }
+        .standing-table td:first-child { text-align:left; }
+        .highlight-kor { background:#ebf8ff; font-weight:bold; }
+        .source-caption { margin-top:8px; color:#718096; font-size:12px; text-align:center; line-height:1.45; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏆 취득세과 미니 토토 🏆</h1>
+    <div class="match-up">
+        <span class="team-name"><img class="top-flag" src="https://flagcdn.com/w80/za.png" alt="남아공 국기">남아공</span>
+        <span style="color:#a0aec0; margin:0 5px;">VS</span>
+        <span class="team-name"><img class="top-flag" src="https://flagcdn.com/w80/kr.png" alt="대한민국 국기">대한민국</span>
+    </div>
+    <div class="match-time-box">
+        경기시간: <b>2026. 6. 25.(목) 오전 10:00</b> (한국시간)<br>
+        <span class="deadline-text">참가신청 마감: 경기시간 30분 전, 2026. 6. 25.(목) 오전 9:30</span>
+    </div>
+
+    <div class="rule-box">
+        <strong>📌 미니 토토 룰</strong>
+        <ol>
+            <li>참가자는 경기 전 예상 스코어를 1개씩 등록합니다.</li>
+            <li>인당 참가비는 <b>3,000원 고정</b>입니다.</li>
+            <li>참가신청은 <b>경기시간 30분 전</b>에 마감합니다.</li>
+            <li>실제 결과 입력 후, 정확한 스코어 적중자가 있으면 총 상금을 1/N로 나눕니다.</li>
+            <li>스코어 적중자가 없으면 승·무·패 적중자가 총 상금을 1/N로 나눕니다.</li>
+            <li>배당률은 <b>개인 지급액 ÷ 3,000원</b>으로 표시합니다.</li>
+                    <li>본 미니토토는 국가대표팀 응원과 부서 내 소통·사기진작을 위한 친목성 이벤트로, 사행성 목적이 아닌 단순 오락 차원에서 진행합니다.</li>
+</ol>
+    </div>
+
+    <div class="pool-info" id="totalPoolText">현재 총 상금: 0원 (참가 0명)</div>
+    <div class="status-box" id="bettingStatus">신청 가능 상태입니다.</div>
+    <div class="settlement-summary" id="settlementSummary"></div>
+
+    <div class="input-group" id="entryArea">
+        <input type="text" id="userName" placeholder="이름" autocomplete="off">
+        <input type="number" id="korScore" placeholder="한국" min="0">
+        <span style="font-weight:bold;">:</span>
+        <input type="number" id="rsaScore" placeholder="남아공" min="0">
+        <button onclick="addPrediction()">등록</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>예측 스코어</th>
+                    <th>예측 결과</th>
+                    <th>배당률</th>
+                    <th>지급액</th>
+                </tr>
+            </thead>
+            <tbody id="predictList"></tbody>
+        </table>
+    </div>
+
+    <div class="preview-box">
+        <h3>🇰🇷 남아공전 경기예측 참고</h3>
+        <ul>
+            <li>정확한 라인업·전력분석·네이버 승부예측은 아래 링크에서 확인하세요.</li>
+            <li>아래 정보는 네이버 경기 프리뷰 화면을 참고해 고정값으로 넣은 간략 요약입니다.</li>
+        </ul>
+        <a class="preview-link" href="https://m.sports.naver.com/game/LdzflN63k3JBC5O/preview" target="_blank" rel="noopener noreferrer">네이버 경기예측 바로가기</a>
+        <div class="preview-note">※ 네이버 스포츠 페이지는 외부 사이트 안에 그대로 삽입되는 방식이 제한될 수 있어, 새 창 링크 방식으로 연결했습니다.</div>
+
+        <div class="fixed-info">
+            <div class="fixed-info-title">남아공전 고정 참고정보</div>
+            <div class="compare-grid">
+                <div class="team-card"><img class="flag-img-block" src="https://flagcdn.com/w80/za.png" alt="남아공 국기">남아프리카 공화국</div>
+                <div class="vs-text">VS</div>
+                <div class="team-card"><img class="flag-img-block" src="https://flagcdn.com/w80/kr.png" alt="대한민국 국기">대한민국</div>
+            </div>
+
+            <table class="info-table">
+                <thead>
+                    <tr><th>구분</th><th><span class="team-head"><img class="flag-img-inline" src="https://flagcdn.com/w40/za.png" alt="남아공 국기">남아공</span></th><th><span class="team-head"><img class="flag-img-inline" src="https://flagcdn.com/w40/kr.png" alt="대한민국 국기">대한민국</span></th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>소속 대륙</td><td>아프리카</td><td>아시아</td></tr>
+                    <tr><td>FIFA 랭킹</td><td>60위</td><td>25위</td></tr>
+                    <tr><td>본선 진출</td><td>4회</td><td>12회</td></tr>
+                    <tr><td>최고 성적</td><td>조별리그 3위</td><td>4위(2002)</td></tr>
+                    <tr><td>직전 대회</td><td>미출전</td><td>16강</td></tr>
+                </tbody>
+            </table>
+
+            <table class="info-table advancement-row">
+                <thead>
+                    <tr><th>상위 라운드 진출 예측</th><th><span class="team-head"><img class="flag-img-inline" src="https://flagcdn.com/w40/za.png" alt="남아공 국기">남아공</span></th><th><span class="team-head"><img class="flag-img-inline" src="https://flagcdn.com/w40/kr.png" alt="대한민국 국기">대한민국</span></th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>32강 진출</td><td><strong>18.1%</strong></td><td><strong>89.8%</strong></td></tr>
+                    <tr><td>16강 진출</td><td><strong>5.6%</strong></td><td><strong>41.5%</strong></td></tr>
+                    <tr><td>우승</td><td><strong>0.0%</strong></td><td><strong>0.5%</strong></td></tr>
+                </tbody>
+            </table>
+
+            <table class="info-table standing-table">
+                <thead>
+                    <tr><th>A조 순위</th><th>승점</th><th>승</th><th>무</th><th>패</th><th>골득실</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="rank-team">1 <img class="flag-img-inline" src="https://flagcdn.com/w40/mx.png" alt="멕시코 국기">멕시코</span></td><td>6</td><td>2</td><td>0</td><td>0</td><td>+3</td></tr>
+                    <tr class="highlight-kor"><td><span class="rank-team">2 <img class="flag-img-inline" src="https://flagcdn.com/w40/kr.png" alt="대한민국 국기">대한민국</span></td><td>3</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+                    <tr><td><span class="rank-team">3 <img class="flag-img-inline" src="https://flagcdn.com/w40/cz.png" alt="체코 국기">체코</span></td><td>1</td><td>0</td><td>1</td><td>1</td><td>-1</td></tr>
+                    <tr><td><span class="rank-team">4 <img class="flag-img-inline" src="https://flagcdn.com/w40/za.png" alt="남아공 국기">남아공</span></td><td>1</td><td>0</td><td>1</td><td>1</td><td>-2</td></tr>
+                </tbody>
+            </table>
+            <div class="source-caption">※ 위 수치는 사용자가 제공한 네이버 프리뷰 화면 캡처 기준의 고정 참고정보입니다. 최신 변동사항은 네이버 링크에서 확인하세요.</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+    import {
+        getFirestore,
+        collection,
+        doc,
+        setDoc,
+        getDoc,
+        onSnapshot,
+        query,
+        orderBy,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjwDSbkO4oxWswlSRwU6c90KyJ7MlkMYY",
+        authDomain: "miniwctoto.firebaseapp.com",
+        projectId: "miniwctoto",
+        storageBucket: "miniwctoto.firebasestorage.app",
+        messagingSenderId: "804729451401",
+        appId: "1:804729451401:web:c982aec660f74d81cb6758",
+        measurementId: "G-EL2PWVRLWW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+    const db = getFirestore(app);
+
+    const MATCH_ID = "korea-southafrica-2026";
+    const ENTRY_FEE = 3000;
+    const MATCH_TIME_TEXT = "2026. 6. 25.(목) 오전 10:00";
+    const DEADLINE_TEXT = "2026. 6. 25.(목) 오전 9:30";
+    const ENTRY_DEADLINE = new Date("2026-06-25T09:30:00+09:00");
+    const predictionsRef = collection(db, "matches", MATCH_ID, "predictions");
+    const settingsRef = doc(db, "matches", MATCH_ID, "settings", "main");
+
+    let predictions = [];
+    let settings = {
+        closed: false,
+        finalKor: null,
+        finalRsa: null,
+        resultEntered: false
+    };
+    let lastSettlement = null;
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function getOutcomeText(kor, rsa) {
+        if (kor > rsa) return "한국 승";
+        if (kor < rsa) return "남아공 승";
+        return "무승부";
+    }
+
+    function getTotalPool() {
+        return predictions.length * ENTRY_FEE;
+    }
+
+    function updatePoolDisplay() {
+        const totalPool = getTotalPool();
+        document.getElementById('totalPoolText').innerText = `현재 총 상금: ${totalPool.toLocaleString()}원 (참가 ${predictions.length}명)`;
+    }
+
+    function isDeadlinePassed() {
+        return new Date() >= ENTRY_DEADLINE;
+    }
+
+    function isBettingClosed() {
+        return settings.closed || isDeadlinePassed();
+    }
+
+    function updateBettingStatus() {
+        const status = document.getElementById('bettingStatus');
+        const entryArea = document.getElementById('entryArea');
+        if (isBettingClosed()) {
+            status.innerText = `신청이 마감되었습니다. 참가신청 마감: ${DEADLINE_TEXT}`;
+            status.classList.add('closed');
+            entryArea.style.display = 'none';
+        } else {
+            status.innerText = `신청 가능 상태입니다. 경기시간: ${MATCH_TIME_TEXT} / 신청마감: ${DEADLINE_TEXT}`;
+            status.classList.remove('closed');
+            entryArea.style.display = 'flex';
+        }
+    }
+
+    function isValidScore(scoreText) {
+        if (scoreText === "") return false;
+        const score = Number(scoreText);
+        return Number.isInteger(score) && score >= 0;
+    }
+
+    function hasSavedFinalResult() {
+        return settings.resultEntered === true &&
+            Number.isInteger(Number(settings.finalKor)) &&
+            Number.isInteger(Number(settings.finalRsa)) &&
+            Number(settings.finalKor) >= 0 &&
+            Number(settings.finalRsa) >= 0;
+    }
+
+    async function loadOrCreateSettings() {
+        const snap = await getDoc(settingsRef);
+        if (!snap.exists()) {
+            await setDoc(settingsRef, {
+                entryFee: ENTRY_FEE,
+                closed: false,
+                finalKor: null,
+                finalRsa: null,
+                resultEntered: false,
+                createdAt: serverTimestamp()
+            });
+        }
+    }
+
+    function listenSettings() {
+        onSnapshot(settingsRef, (snap) => {
+            if (snap.exists()) {
+                settings = { ...settings, ...snap.data() };
+            }
+            updateBettingStatus();
+            if (hasSavedFinalResult() && predictions.length > 0) {
+                calculateWinner();
+            } else {
+                clearSettlement();
+                updateTable();
+            }
+        });
+    }
+
+    function listenPredictions() {
+        const q = query(predictionsRef, orderBy("createdAt", "asc"));
+        onSnapshot(q, (snapshot) => {
+            predictions = [];
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                predictions.push({
+                    id: docSnap.id,
+                    name: data.name,
+                    kor: data.kor,
+                    rsa: data.rsa,
+                    outcome: data.outcome
+                });
+            });
+            updatePoolDisplay();
+            if (hasSavedFinalResult() && predictions.length > 0) {
+                calculateWinner();
+            } else {
+                updateTable();
+            }
+        });
+    }
+
+    window.addPrediction = async function () {
+        const name = document.getElementById('userName').value.trim();
+        const korStr = document.getElementById('korScore').value;
+        const rsaStr = document.getElementById('rsaScore').value;
+
+        if (isBettingClosed()) {
+            alert("신청이 마감되었습니다.");
+            updateBettingStatus();
+            return;
+        }
+        if (!name || !isValidScore(korStr) || !isValidScore(rsaStr)) {
+            alert("이름과 0 이상의 정수 스코어를 모두 입력해주세요!");
+            return;
+        }
+
+        const kor = parseInt(korStr, 10);
+        const rsa = parseInt(rsaStr, 10);
+        const outcome = getOutcomeText(kor, rsa);
+        const existingDoc = await getDoc(doc(predictionsRef, name));
+        if (existingDoc.exists()) {
+            alert("이미 등록된 이름입니다. 수정이 필요한 경우 관리자에게 문의하세요.");
+            return;
+        }
+
+        try {
+            await setDoc(doc(predictionsRef, name), {
+                name,
+                kor,
+                rsa,
+                outcome,
+                createdAt: serverTimestamp()
+            });
+            document.getElementById('userName').value = "";
+            document.getElementById('korScore').value = "";
+            document.getElementById('rsaScore').value = "";
+            document.getElementById('userName').focus();
+        } catch (error) {
+            alert("등록 중 오류가 발생했습니다: " + error.message);
+        }
+    };
+
+    function clearSettlement() {
+        lastSettlement = null;
+        const summary = document.getElementById('settlementSummary');
+        summary.style.display = 'none';
+        summary.innerText = '';
+    }
+
+    function updateTable() {
+        const tbody = document.getElementById('predictList');
+        tbody.innerHTML = "";
+        if (predictions.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">아직 등록된 참가자가 없습니다.</td></tr>`;
+            return;
+        }
+        predictions.forEach(p => {
+            tbody.innerHTML += `<tr><td>${escapeHtml(p.name)}</td><td>${p.kor} : ${p.rsa}</td><td>${p.outcome}</td><td>-</td><td>-</td></tr>`;
+        });
+    }
+
+    function calculateWinner() {
+        const finalKor = Number(settings.finalKor);
+        const finalRsa = Number(settings.finalRsa);
+        const finalOutcome = getOutcomeText(finalKor, finalRsa);
+        const totalPool = getTotalPool();
+        const exactWinners = predictions.filter(p => p.kor === finalKor && p.rsa === finalRsa);
+        const outcomeWinners = predictions.filter(p => p.outcome === finalOutcome);
+
+        let settlementType = "당첨자 없음";
+        let winners = [];
+        let prize = 0;
+
+        if (exactWinners.length > 0) {
+            settlementType = "스코어 적중";
+            winners = exactWinners;
+            prize = Math.floor(totalPool / exactWinners.length);
+        } else if (outcomeWinners.length > 0) {
+            settlementType = "승무패 적중";
+            winners = outcomeWinners;
+            prize = Math.floor(totalPool / outcomeWinners.length);
+        }
+
+        lastSettlement = { finalKor, finalRsa, finalOutcome, settlementType, winners, prize, entryFee: ENTRY_FEE, totalPool };
+        renderSettlementTable();
+        renderSettlementSummary();
+    }
+
+    function formatOdds(prize) {
+        return `${(prize / ENTRY_FEE).toFixed(2)}배`;
+    }
+
+    function isWinner(p, settlement) {
+        return settlement.winners.some(w => w.id === p.id);
+    }
+
+    function renderSettlementTable() {
+        const tbody = document.getElementById('predictList');
+        const settlement = lastSettlement;
+        tbody.innerHTML = "";
+        predictions.forEach(p => {
+            const winner = isWinner(p, settlement);
+            const rowClass = winner ? (settlement.settlementType === "스코어 적중" ? 'exact-winner' : 'outcome-winner') : 'loser';
+            const tag = winner ? (settlement.settlementType === "스코어 적중" ? '👑 스코어적중' : '💰 승무패적중') : '낙첨';
+            const payout = winner ? settlement.prize : 0;
+            const odds = winner ? formatOdds(settlement.prize) : '0.00배';
+            tbody.innerHTML += `<tr class="${rowClass}"><td>${escapeHtml(p.name)}</td><td>${p.kor} : ${p.rsa}</td><td>${p.outcome} / ${tag}</td><td class="odds-text">${odds}</td><td class="money-text">${payout.toLocaleString()}원</td></tr>`;
+        });
+    }
+
+    function renderSettlementSummary() {
+        const settlement = lastSettlement;
+        const summary = document.getElementById('settlementSummary');
+        const winnerNames = settlement.winners.map(w => escapeHtml(w.name)).join(', ');
+        if (settlement.winners.length === 0) {
+            summary.innerHTML = `실제 결과: 대한민국 ${settlement.finalKor} : ${settlement.finalRsa} 남아공<br>정산 결과: 당첨자 없음 / 총 상금 ${settlement.totalPool.toLocaleString()}원`;
+        } else {
+            summary.innerHTML = `실제 결과: 대한민국 ${settlement.finalKor} : ${settlement.finalRsa} 남아공<br>${settlement.settlementType} 당첨자: ${winnerNames}<br>인당 지급액 ${settlement.prize.toLocaleString()}원 / 배당률 ${formatOdds(settlement.prize)}`;
+        }
+        summary.style.display = 'block';
+    }
+
+    setInterval(updateBettingStatus, 30000);
+
+    await loadOrCreateSettings();
+    listenSettings();
+    listenPredictions();
+    updatePoolDisplay();
+    updateTable();
+</script>
+
+</body>
+</html>
